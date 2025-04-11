@@ -1,12 +1,15 @@
 import * as express from 'express';
-import 'reflect-metadata';
-import database from './database';
+import sequelizeLoader from './sequelize';
 import server from './server';
+import { swaggerUi, swaggerSpec } from '../docs/swagger';
 
 export default async (app: express.Application) => {
-  const connection = await database();
-  console.log('DB loaded and connected!');
+  await sequelizeLoader();
+  console.log('🟢 DB conectado com Sequelize!');
+
+  // Configuração do Swagger
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   await server(app);
-  console.log('Server loaded!');
+  console.log('🚀 Servidor carregado!');
 };

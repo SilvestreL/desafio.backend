@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import auth from './auth';
-import users from './users';
+import importarCsv from './importarCsv';
+import boletos from './boletos';
 
 const router = Router();
-auth(router);
-users(router);
-
+router.use('/importar-csv', importarCsv);
+router.use('/boletos', boletos);
 export default router;

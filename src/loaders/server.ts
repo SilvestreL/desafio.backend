@@ -1,49 +1,42 @@
 import bodyParser from 'body-parser';
-import { errors, celebrate, isCelebrateError } from 'celebrate';
+import { errors, isCelebrateError } from 'celebrate';
 import cors from 'cors';
-import * as express from 'express';
+import { Application, Request, Response,} from 'express';
 import helmet from 'helmet';
 import routes from '../api/routes';
 
-export default (app: express.Application) => {
+export default (app: Application) => {
   app.enable('trust proxy');
   app.use(cors());
   app.use(helmet());
   app.use(bodyParser.json());
-  app.use(errors());
+  app.use(errors()); // celebrate
 
   app.use('/api', routes);
 
-  /// catch 404 and forward to error handler
-  app.use((req, res, next) => {
-    const error: Error = new Error('Not Found');
-    error['status'] = 404;
-    next(error);
+  // 404 handler
+  app.use((req: Request, res: Response) => {
+    const error = new Error('Not Found') as any;
+    error.status = 404;
+    res.status(404).json({ error: error.message });
   });
 
-  /// error handlers
-  app.use((err, req, res, next) => {
-    /**
-     * Handle 401 thrown by express-jwt library
-     */
-    if (err.name === 'UnauthorizedError') {
-      return res.status(err.status).send({ message: err.message }).end();
-    }
-
-    /**
-     * Handle validation error thrown by Celebrate + Joi
-     */
+  // Validation + Error handler
+  app.use((err: any, req: Request, res: Response) => {
+    // Celebrate error
     if (isCelebrateError(err)) {
-      return res.status(422).send({ message: err.message, details: err.details }).end();
+      return res.status(422).json({
+        error: {
+          message: err.message,
+          details: err.details,
+        },
+      });
     }
-    return next(err);
-  });
 
-  app.use((err, req, res, next) => {
-    res.status(err.status || 500);
-    res.json({
-      errors: {
-        message: err.message,
+    // Default
+    res.status(err.status || 500).json({
+      error: {
+        message: err.message || 'Internal Server Error',
       },
     });
   });
