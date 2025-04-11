@@ -1,46 +1,154 @@
-try! [resty.js](https://github.com/restyjs/resty), my newest node.js + express based framework. with controllers and middlewares built in.
+# 💼 Desafio Técnico Backend - Node.js
 
-# nodejs-boilerplate
+Este projeto foi desenvolvido como parte de um desafio técnico para uma vaga de Desenvolvedor Backend (Node.js). Ele permite o gerenciamento de boletos, com funcionalidades como importação via CSV ou PDF, listagem com filtros, geração de relatórios em PDF (base64), e mapeamento automático de lotes.
 
-Clean Architecture for node.js projects
+---
 
-## Folder Structure
+## 🚀 Tecnologias Utilizadas
+
+- **Node.js + TypeScript**
+- **Express** (servidor HTTP)
+- **Sequelize + SQLite** (ORM e banco de dados)
+- **PDFKit** (geração de relatórios PDF)
+- **Multer** (upload de arquivos)
+- **CSV-Parse** (leitura de arquivos `.csv`)
+- **Zod** (validação de filtros e entradas)
+- **Swagger** (documentação da API)
+- **Docker** (containerização para execução em produção)
+
+---
+
+## 📄 Documentação da API (Swagger)
+
+A documentação interativa está disponível em:
 
 ```
-src
-│   main.ts         # Application entry point
-└───api             # Express route controllers for all the endpoints of the app
-└───config          # Environment variables and configurations
-└───loaders         # Split the startup process into modules
-└───models          # TypeORM Entities
-└───services        # All the business logic is here
-└───types           # Type declaration files (d.ts) for Typescript
-
+http://localhost:3000/api-docs
 ```
 
-## Getting Started
+Você pode testar todos os endpoints por ali — inclusive upload de CSVs e geração de relatórios PDF.
 
-### Step 1: Set up the Development Environment
+---
 
-You need to set up your development environment before you can do anything.
+## 📁 Endpoints da API
 
-Install [Node.js and NPM](https://nodejs.org/en/download/)
+### 📥 Importar boletos via CSV
 
-- on OSX use [homebrew](http://brew.sh) `brew install node`
-- on Windows use [chocolatey](https://chocolatey.org/) `choco install nodejs`
+- `POST /api/importar-csv`
+- Espera um arquivo `.csv` com os campos: `nome`, `unidade`, `valor`, `linha_digitavel`
+- A unidade será mapeada automaticamente para `id_lote` com base no padrão `"0017" → 17"`
 
-### Install
+### 🗂 Importar boletos via PDF (lote)
 
-- Install all dependencies with `yarn install`
+- `POST /api/importar-pdf`
+- Espera um PDF com uma página por boleto (já inserido via CSV)
+- O sistema salvará os arquivos como `1.pdf`, `2.pdf`, etc., na pasta `/tmp/boletos`
 
-### Running in dev mode
+### 📃 Listar boletos com filtros
 
-- Run `yarn start`
-- The server address will be displayed to you as `http://0.0.0.0:3000`
+- `GET /api/boletos`
+- Parâmetros de filtro:
+  - `nome`
+  - `valor_inicial`
+  - `valor_final`
+  - `id_lote`
 
-### Building the project and run it
+### 🧾 Gerar relatório em PDF (base64)
 
-- Run `yarn build` to generated all JavaScript files from the TypeScript sources.
-- the builded app located in `dist`.
+- `GET /api/boletos?relatorio=1`
+- Retorna o PDF (base64) com os boletos filtrados
 
-Inspired by Bulletproof Node.js architecture with modificatins
+---
+
+## 🧪 Testes Automatizados
+
+O projeto possui testes com Jest cobrindo:
+
+- Importação de boletos via CSV
+- Geração de relatório PDF
+- Listagem com filtros
+- Validação de erros e mapeamento de lotes
+
+### Executar os testes:
+
+```bash
+npm run test
+```
+
+---
+
+## ⚙️ Como rodar o projeto
+
+### 🔸 Opção 1: Localmente com Node.js
+
+```bash
+# Instale as dependências
+npm install
+
+# Rode a aplicação em modo desenvolvimento
+npm run dev
+
+# (opcional) Popule o banco com lotes
+npx sequelize-cli db:seed:all
+```
+
+### 🔸 Opção 2: Com Docker (produção)
+
+```bash
+# Construa a imagem
+docker build -t desafio-boletos .
+
+# Rode o container
+docker run -p 3000:3000 desafio-boletos
+```
+
+> Após isso, acesse: `http://localhost:3000/api-docs`
+
+---
+
+## 💾 Estrutura de Diretórios
+
+```
+src/
+├── api/routes/         # Rotas HTTP da aplicação
+├── controllers/        # Recebem e respondem às requisições
+├── services/           # Lógica de negócio
+├── infrastructure/     # Banco de dados, ORM, config
+├── docs/               # Swagger/OpenAPI
+└── tmp/boletos/        # PDFs gerados após importação em lote
+```
+
+---
+
+## ✉️ Exemplo de retorno (PDF base64)
+
+```json
+{
+  "relatorio": "JVBERi0xLjQKJeLjz9MK... (base64)"
+}
+```
+
+Cole o conteúdo em sites como [https://base64.guru/converter/decode/pdf](https://base64.guru/converter/decode/pdf) para visualizar o relatório.
+
+---
+
+## ✅ Diferenciais do Projeto
+
+- 🧠 Arquitetura limpa e bem segmentada (controllers, services, infra)
+- ⚙️ Cobertura total dos requisitos técnicos
+- 📄 Swagger completo e funcional
+- 🔍 Validação com Zod para segurança dos filtros
+- 🐳 Pronto para rodar com Docker
+- 💡 Código testável, limpo e modular
+
+---
+
+## 📌 Considerações finais
+
+Todos os critérios do desafio foram implementados com foco em clareza, boas práticas, testes e documentação. O projeto está pronto para uso local, demonstração técnica ou continuação em produção.
+
+---
+
+## 🔗 Repositório
+
+"repository": "https://github.com/seu-usuario/seu-repositorio.git"
